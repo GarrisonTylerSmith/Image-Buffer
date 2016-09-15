@@ -67,3 +67,47 @@ So this is seems like the easiest way to check all the errors hwoever I do not k
 	fclose(fp);
 	return img;
 }
+void writePPM(const char *filename, PPMImage *img){
+	FILE *fp;
+	// open file for output
+	fp = fopen(filename, "wb");
+	if(!fp){
+		fprintf(stderr, "Unable to open file '%s'\n", filename);
+		exit(1);
+	}
+	// write the header file
+	// image format
+	fprintf(fp,"P6\n");
+	fprintf(fp, "P3\n");
+	// comments
+	fprintf(fp, "# Created by %s\n", CREATOR);
+	// image size
+	fprintf(fp, "%d %d\n", img->x,img->y);
+	// rgb component depth
+	fprintf(fp, "%d\n", RGB_COMPONENT_COLOR);
+
+	// pixal data
+	fwrite(img->data, 3 * img->x, img->y, fp);
+	fclose(fp);
+}
+void changeColorPPM(PPMImage *img){
+	if(img){
+		for(int i=0;i<img->x*img->y;i++){
+			img->data[i].red=RGB_COMPONENT_COLOR-img->data[i].red;
+			img->data[i].green=RGB_COMPONENT_COLOR-img->data[i].green;
+			img->data[i].blue=RGB_COMPONENT_COLOR-img->data[i].blue;
+
+		}
+	}
+}
+int main(int argc, char *argv[]){
+	printf(argv[0]);
+	PPMImage *image;
+	image = readPPM("can_bottom.ppm");
+	changeColorPPM(image);
+	writePPM("can_bottom2.ppm",image);
+	printf("Press any key...");
+	getchar();
+}
+ This new added code was implementiung the write methods and the changing of the colors method 
+ I also added a main method which testes the code and its ablitiy to run . So far I am struggling with it but I will continuing to test
