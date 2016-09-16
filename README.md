@@ -17,7 +17,7 @@ PPMImage;
 So the next part of this code is checking the errors for the user when they try and write or edit the image 
 So this is seems like the easiest way to check all the errors hwoever I do not know if I am checking everything though 
 // check the format of the image
-	if(buff[0] != 'P' || buff[1] != '6' || buff[1] != '3'){
+	if(buff[0] != 'P'&& buff[1] != '6' || buff[1] != '3'){
 		fprintf(stderr, "Invalid image format (MUST BE P6 or P3)'%s'\n" );
 		exit(1);
 	}
@@ -67,7 +67,7 @@ So this is seems like the easiest way to check all the errors hwoever I do not k
 	fclose(fp);
 	return img;
 }
-void writePPM(const char *filename, PPMImage *img){
+void writePPM(const char *filename, PPMImage *img, int type){
 	FILE *fp;
 	// open file for output
 	fp = fopen(filename, "wb");
@@ -77,8 +77,7 @@ void writePPM(const char *filename, PPMImage *img){
 	}
 	// write the header file
 	// image format
-	fprintf(fp,"P6\n");
-	fprintf(fp, "P3\n");
+	fprintf(fp,"P%d\n", type);
 	// comments
 	fprintf(fp, "# Created by %s\n", CREATOR);
 	// image size
@@ -87,7 +86,17 @@ void writePPM(const char *filename, PPMImage *img){
 	fprintf(fp, "%d\n", RGB_COMPONENT_COLOR);
 
 	// pixal data
+	if(type==3){
+		//fprintf(fp, "%s", img->data);
+		for(int i=0;i<img->x*img->y;i++) {
+			fprintf(fp, "%d\n", img->data[i].red);
+			fprintf(fp, "%d\n", img->data[i].green);
+			fprintf(fp, "%d\n", img->data[i].blue);
+		}
+	}
+	else {
 	fwrite(img->data, 3 * img->x, img->y, fp);
+	}
 	fclose(fp);
 }
 void changeColorPPM(PPMImage *img){
@@ -101,13 +110,25 @@ void changeColorPPM(PPMImage *img){
 	}
 }
 int main(int argc, char *argv[]){
-	printf(argv[0]);
-	PPMImage *image;
-	image = readPPM("can_bottom.ppm");
-	changeColorPPM(image);
-	writePPM("can_bottom2.ppm",image);
-	printf("Press any key...");
-	getchar();
+	printf("starting..\n");
+ 	char* target = argv[1];
+ 	char* input = argv[2];
+ 	char* output = argv[3];
+ 	printf("target='%s' input='%s' output='%s'\n", target, input, output);
+ 	PPMImage *image;
+	image = readPPM(input);
+ 	//changeColorPPM(image);
+ 	writePPM(output, image, atoi(target));
+ 	return 0;
 }
  This new added code was implementiung the write methods and the changing of the colors method 
  I also added a main method which testes the code and its ablitiy to run . So far I am struggling with it but I will continuing to test
+ 
+ So I have just updated the code this code runs great when it comes to the input but the output seems to be in asscii form and I cannot figure out how to change it . 
+ all: Imagebuffer.c
+	gcc Imagebuffer.c -o Imagebuff
+
+clean:
+	rm -rf Imagebuff *~
+
+Above is my make file 
